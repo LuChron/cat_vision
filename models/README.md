@@ -1,6 +1,6 @@
 # Model files (not committed to Git)
 
-Place these three files here before running the robot pipeline:
+Place these three files here before running the pipeline:
 
 ```text
 models/

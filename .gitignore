@@ -24,4 +24,5 @@ models/archive/
 
 # Generated experiments and inference artefacts
 outputs/
+pipeline_result*.jpg
 *.log

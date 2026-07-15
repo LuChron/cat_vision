@@ -69,7 +69,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", type=Path, default=Path("models/classifier/best_effnet_b2_cat_breeds.pth"))
     parser.add_argument("--class-map", type=Path, default=Path("config/class_to_idx.json"))
     parser.add_argument("--conf", type=float, default=0.25)
-    parser.add_argument("--output", type=Path, default=Path("pipeline_result.jpg"))
+    parser.add_argument("--output", type=Path, default=Path("outputs/runtime/pipeline_result.jpg"))
     return parser.parse_args()
 
 

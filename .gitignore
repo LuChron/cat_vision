@@ -17,12 +17,10 @@ data/
 # Local test images and camera snapshots
 test_scene/
 
-# Downloaded YOLO weights (re-downloadable from Ultralytics)
-models/detector/*.pt
 # Older experimental YOLO weights kept only on this machine
 models/archive/
-# Trained classifier weight — track in Git so teammates share it
-# models/classifier/*.pth
+# The selected detector and classifier weights in models/detector and
+# models/classifier are versioned with this project.
 
 # Generated experiments and inference artefacts
 outputs/

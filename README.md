@@ -14,14 +14,13 @@ The detector uses only this two-model cascade. If neither YOLO model detects a c
 
 ## Quick start
 
-The fine-tuned CNN checkpoint is included in Git. Download the two public YOLO detector weights once:
+The two YOLO detector weights and the fine-tuned CNN checkpoint are included in Git.
 
 Create the environment once on a CUDA machine:
 
 ```bash
 bash setup_catvision_env.sh
 conda activate catvision
-python -m scripts.download_detector_models
 ```
 
 Run one image from the project root:
@@ -95,4 +94,4 @@ After retraining, copy `outputs/classifier/best_effnet_b2_cat_breeds.pth` to `mo
 
 ## Git policy
 
-Source code, the class mapping, setup script, documentation, and selected trained CNN checkpoint are versioned. Datasets, snapshots, generated outputs, Python caches, notebooks, and downloaded YOLO weights are intentionally ignored. This keeps the repository small and prevents accidentally committing multi-gigabyte data.
+Source code, the class mapping, setup script, documentation, and selected model weights are versioned. Datasets, snapshots, generated outputs, Python caches, notebooks, and older experimental weights are intentionally ignored. This keeps the repository small and prevents accidentally committing multi-gigabyte data.

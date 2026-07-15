@@ -1,0 +1,7 @@
+# Install PyTorch and Torchvision separately with the CUDA wheel command in README.md.
+ultralytics>=8.3
+opencv-python>=4.10
+pillow>=10
+matplotlib>=3.8
+tqdm>=4.66
+numpy>=1.26

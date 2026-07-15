@@ -14,13 +14,14 @@ The detector uses only this two-model cascade. If neither YOLO model detects a c
 
 ## Quick start
 
-Before running, place the three model files listed in [models/README.md](models/README.md) in the exact directories shown there. They are intentionally not stored in Git.
+The fine-tuned CNN checkpoint is included in Git. Download the two public YOLO detector weights once:
 
 Create the environment once on a CUDA machine:
 
 ```bash
 bash setup_catvision_env.sh
 conda activate catvision
+python -m scripts.download_detector_models
 ```
 
 Run one image from the project root:
@@ -53,7 +54,7 @@ The EfficientNet-B2 checkpoint was trained for 15 epochs on automatically YOLO-c
 catvision/       Detector, single-image inference, and batch inference
 scripts/         Dataset audit, automatic crop, split, training, validation, YOLO check
 config/          Versioned class-index mapping used by the checkpoint
-models/          Local YOLO and CNN weights; excluded from Git
+models/          Downloaded YOLO weights and the versioned CNN checkpoint
 data/            Local raw/cropped/split datasets; excluded from Git
 outputs/         Generated visualisations, reports, and experiment results; excluded from Git
 ```
@@ -94,4 +95,4 @@ After retraining, copy `outputs/classifier/best_effnet_b2_cat_breeds.pth` to `mo
 
 ## Git policy
 
-Source code, the class mapping, setup script, and documentation are versioned. Datasets, snapshots, generated outputs, Python caches, notebooks, and model weights are intentionally ignored. This keeps the repository small and prevents accidentally committing multi-gigabyte data or a checkpoint that no longer matches the source code.
+Source code, the class mapping, setup script, documentation, and selected trained CNN checkpoint are versioned. Datasets, snapshots, generated outputs, Python caches, notebooks, and downloaded YOLO weights are intentionally ignored. This keeps the repository small and prevents accidentally committing multi-gigabyte data.

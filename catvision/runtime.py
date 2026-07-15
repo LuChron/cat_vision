@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the validated YOLO cascade followed by EfficientNet-B2 breed classification."""
+"""Run the validated YOLO cascade followed by EfficientNet-B2 on one image."""
 
 from __future__ import annotations
 
@@ -65,9 +65,7 @@ def predict_frame(frame, detectors, classifier, classes, transform, device, conf
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    source = parser.add_mutually_exclusive_group(required=True)
-    source.add_argument("--image", type=Path)
-    source.add_argument("--camera", type=int)
+    parser.add_argument("--image", type=Path, required=True)
     parser.add_argument("--model", type=Path, default=Path("models/classifier/best_effnet_b2_cat_breeds.pth"))
     parser.add_argument("--class-map", type=Path, default=Path("config/class_to_idx.json"))
     parser.add_argument("--conf", type=float, default=0.25)
@@ -82,33 +80,15 @@ def main() -> None:
     detectors = load_detectors()
     classifier, classes = load_classifier(args.model, args.class_map, device)
     transform = EfficientNet_B2_Weights.DEFAULT.transforms()
-    if args.image:
-        frame = cv2.imread(str(args.image))
-        if frame is None:
-            raise FileNotFoundError(args.image)
-        annotated, prediction = predict_frame(frame, detectors, classifier, classes, transform, device, args.conf)
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        if not cv2.imwrite(str(args.output), annotated):
-            raise RuntimeError(f"Could not write output image: {args.output}")
-        print("Prediction:", prediction if prediction else "No cat detected")
-        print("Saved:", args.output)
-        return
-    camera = cv2.VideoCapture(args.camera)
-    if not camera.isOpened():
-        raise RuntimeError(f"Could not open camera index {args.camera}")
-    print("Press q to quit.")
-    while True:
-        ok, frame = camera.read()
-        if not ok:
-            break
-        annotated, prediction = predict_frame(frame, detectors, classifier, classes, transform, device, args.conf)
-        if prediction:
-            print(prediction)
-        cv2.imshow("YOLO cascade + EfficientNet-B2", annotated)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
-    camera.release()
-    cv2.destroyAllWindows()
+    frame = cv2.imread(str(args.image))
+    if frame is None:
+        raise FileNotFoundError(args.image)
+    annotated, prediction = predict_frame(frame, detectors, classifier, classes, transform, device, args.conf)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    if not cv2.imwrite(str(args.output), annotated):
+        raise RuntimeError(f"Could not write output image: {args.output}")
+    print("Prediction:", prediction if prediction else "No cat detected")
+    print("Saved:", args.output)
 
 
 if __name__ == "__main__":

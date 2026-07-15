@@ -29,13 +29,7 @@ Run one image from the project root:
 python -m catvision.runtime --image /path/to/image.jpg
 ```
 
-The annotated image is written to `outputs/runtime/pipeline_result.jpg`. To use a USB/webcam camera (usually index 0):
-
-```bash
-python -m catvision.runtime --camera 0
-```
-
-Press `q` in the video window to exit. If the camera has a different device index, change `0` to `1`, `2`, and so on.
+The annotated image is written to `outputs/runtime/pipeline_result.jpg`. Camera/ROS integration is outside this repository; the external program can pass saved frames to this script or reuse `predict_frame()` from `catvision.runtime`.
 
 ## Batch test
 
@@ -56,7 +50,7 @@ The EfficientNet-B2 checkpoint was trained for 15 epochs on automatically YOLO-c
 ## Repository layout
 
 ```text
-catvision/       Detector, live camera inference, and batch inference
+catvision/       Detector, single-image inference, and batch inference
 scripts/         Dataset audit, automatic crop, split, training, validation, YOLO check
 config/          Versioned class-index mapping used by the checkpoint
 models/          Local YOLO and CNN weights; excluded from Git

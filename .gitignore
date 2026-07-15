@@ -1,0 +1,25 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+
+# Editor and notebook state
+.vscode/
+.idea/
+.ipynb_checkpoints/
+notebooks/legacy/
+
+# Local datasets and camera captures
+data/
+test_scene/
+
+# Downloaded / trained weights (transfer separately for deployment)
+models/**/*.pt
+models/**/*.pth
+
+# Generated experiments and inference artefacts
+outputs/
+*.log

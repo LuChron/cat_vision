@@ -80,6 +80,11 @@ def main() -> None:
         transforms.RandomApply([
             transforms.ColorJitter(brightness=0.18, contrast=0.30, saturation=0.10, hue=0.02)
         ], p=0.80),
+        # Simulate camera auto-exposure washing out white fur: brighten while
+        # reducing contrast and saturation, without changing the class label.
+        transforms.RandomApply([
+            transforms.ColorJitter(brightness=(1.10, 1.45), contrast=(0.65, 1.00), saturation=(0.70, 1.00))
+        ], p=0.30),
         transforms.ToTensor(),
         transforms.Normalize(mean=weights.transforms().mean, std=weights.transforms().std),
     ])

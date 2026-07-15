@@ -11,4 +11,4 @@ models/
     └── best_effnet_b2_cat_breeds.pth
 ```
 
-`config/class_to_idx.json` is versioned with the source code and must stay paired with the classifier checkpoint. Model weights are intentionally excluded from Git because they are large generated/downloaded artifacts. Transfer the three files through the team shared drive or a USB drive.
+`config/class_to_idx.json` is versioned with the source code and must stay paired with the classifier checkpoint. Model weights are intentionally excluded from Git because they are large generated/downloaded artifacts.

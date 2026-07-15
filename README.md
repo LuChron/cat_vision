@@ -1,9 +1,9 @@
-# Robot Cat Vision
+# Cat Vision Pipeline
 
-This repository is the deployable local pipeline for the robot task. It recognises one of five breeds: `pallas`, `persian`, `ragdoll`, `singapura`, and `sphynx`.
+This is a local five-class cat-breed recognition project. It recognises `pallas`, `persian`, `ragdoll`, `singapura`, and `sphynx`.
 
 ```text
-robot camera frame
+input image or camera frame
   -> YOLO26n detects a cat (confidence 0.25)
   -> if it misses, YOLO11m retries (confidence 0.25)
   -> crop the detected cat with an 8% margin
@@ -12,9 +12,9 @@ robot camera frame
 
 The detector uses only this two-model cascade. If neither YOLO model detects a cat, the system reports `No cat detected`; it does not classify the background.
 
-## For the robotics teammate: quickest start
+## Quick start
 
-Clone/copy this repository, then obtain the three model files listed in [models/README.md](models/README.md) from the team shared drive. Do **not** expect them to be in Git. Put them in the exact directories shown there.
+Before running, place the three model files listed in [models/README.md](models/README.md) in the exact directories shown there. They are intentionally not stored in Git.
 
 Create the environment once on a CUDA machine:
 
@@ -23,19 +23,19 @@ bash setup_catvision_env.sh
 conda activate catvision
 ```
 
-From the project root, run one image:
+Run one image from the project root:
 
 ```bash
 python -m catvision.runtime --image /path/to/image.jpg
 ```
 
-The annotated image is written to `outputs/runtime/pipeline_result.jpg`. For a USB/webcam camera (usually index 0):
+The annotated image is written to `outputs/runtime/pipeline_result.jpg`. To use a USB/webcam camera (usually index 0):
 
 ```bash
 python -m catvision.runtime --camera 0
 ```
 
-Press `q` in the video window to exit. If the robot camera has a different device index, change `0` to `1`, `2`, and so on.
+Press `q` in the video window to exit. If the camera has a different device index, change `0` to `1`, `2`, and so on.
 
 ## Batch test
 
@@ -49,14 +49,14 @@ It writes annotated images to `outputs/batch_run/annotated/` and one result per 
 
 ## Current validated result
 
-On the current 12 real maze-camera snapshots, YOLO26n alone detected 10/12 cats; the YOLO26n -> YOLO11m cascade detected 12/12 at confidence `0.25`. This is a small local test set, so it is a deployment check rather than a guarantee for every lighting condition or camera angle.
+On the current 12 on-site camera snapshots, YOLO26n alone detected 10/12 cats; the YOLO26n -> YOLO11m cascade detected 12/12 at confidence `0.25`. This is a small local test set, not a guarantee for every lighting condition or camera angle.
 
-The EfficientNet-B2 checkpoint was trained for 15 epochs on automatically YOLO-cropped images. Its best validation accuracy was **98.92%** on the current split. The Pallas validation set is small, so collect more varied robot-camera examples if time permits.
+The EfficientNet-B2 checkpoint was trained for 15 epochs on automatically YOLO-cropped images. Its best validation accuracy was **98.92%** on the current split. The Pallas validation set is small, so more varied real-scene examples would improve confidence in that class.
 
 ## Repository layout
 
 ```text
-catvision/       Runtime code: detector, live camera inference, batch inference
+catvision/       Detector, live camera inference, and batch inference
 scripts/         Dataset audit, automatic crop, split, training, validation, YOLO check
 config/          Versioned class-index mapping used by the checkpoint
 models/          Local YOLO and CNN weights; excluded from Git
@@ -100,4 +100,4 @@ After retraining, copy `outputs/classifier/best_effnet_b2_cat_breeds.pth` to `mo
 
 ## Git policy
 
-Source code, the class mapping, setup script, and documentation are versioned. Datasets, snapshots, generated outputs, Python caches, notebooks, and model weights are intentionally ignored. This keeps the hand-off repository small and prevents accidentally committing multi-gigabyte data or a checkpoint that no longer matches the source code.
+Source code, the class mapping, setup script, and documentation are versioned. Datasets, snapshots, generated outputs, Python caches, notebooks, and model weights are intentionally ignored. This keeps the repository small and prevents accidentally committing multi-gigabyte data or a checkpoint that no longer matches the source code.

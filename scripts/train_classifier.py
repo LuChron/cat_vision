@@ -66,10 +66,21 @@ def main() -> None:
     print("Device:", torch.cuda.get_device_name(0))
 
     weights = EfficientNet_B2_Weights.DEFAULT
+    # Keep most of the cat in view: head and facial markings are important for
+    # the Ragdoll/Persian distinction. The geometric and image-quality changes
+    # mimic a printed card photographed from a real scene without creating
+    # separate duplicate files on disk.
     train_transform = transforms.Compose([
-        transforms.Resize((288, 288)), transforms.RandomResizedCrop(260, scale=(0.75, 1.0)),
-        transforms.RandomHorizontalFlip(), transforms.RandomRotation(10),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.15), transforms.ToTensor(),
+        transforms.Resize((288, 288)),
+        transforms.RandomResizedCrop(260, scale=(0.88, 1.0), ratio=(0.90, 1.10)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomAffine(degrees=6, translate=(0.04, 0.04), scale=(0.95, 1.05)),
+        transforms.RandomPerspective(distortion_scale=0.15, p=0.35),
+        transforms.RandomApply([transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 1.2))], p=0.20),
+        transforms.RandomApply([
+            transforms.ColorJitter(brightness=0.18, contrast=0.30, saturation=0.10, hue=0.02)
+        ], p=0.80),
+        transforms.ToTensor(),
         transforms.Normalize(mean=weights.transforms().mean, std=weights.transforms().std),
     ])
     val_transform = weights.transforms()

@@ -90,6 +90,8 @@ python -m scripts.train_classifier --data-dir data/split --output-dir outputs/cl
 python -m scripts.validate_classifier --data-dir data/split/val
 ```
 
+Training applies online augmentation only to the training split: small perspective and affine changes, blur, and lighting/contrast changes. It is intended to make the classifier less sensitive to printed-card angle, glare, and white-fur exposure while keeping most of the cat's head in view. Validation images are never augmented.
+
 After retraining, copy `outputs/classifier/best_effnet_b2_cat_breeds.pth` to `models/classifier/best_effnet_b2_cat_breeds.pth`. Keep `config/class_to_idx.json` aligned with the new checkpoint's `class_to_idx` field before deployment.
 
 ## Git policy

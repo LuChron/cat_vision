@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 from pathlib import Path
 
@@ -14,6 +15,22 @@ from PIL import Image
 from torchvision.models import EfficientNet_B2_Weights, efficientnet_b2
 
 from catvision.detector import detect_with_cascade, load_detectors
+
+
+class SmoothedClassifier:
+    """Average probability vectors over a sliding window so the displayed
+    breed doesn't jump between Ragdoll/Persian on every frame."""
+
+    def __init__(self, window: int = 15):
+        self._buffer: collections.deque = collections.deque(maxlen=window)
+
+    def update(self, probs: torch.Tensor) -> torch.Tensor:
+        """Push a new probability vector and return the smoothed average."""
+        self._buffer.append(probs.clone())
+        return torch.stack(list(self._buffer)).mean(dim=0)
+
+    def reset(self) -> None:
+        self._buffer.clear()
 
 
 def build_classifier(num_classes: int) -> nn.Module:
@@ -43,7 +60,8 @@ def crop_with_margin(frame, box, margin: float = 0.08):
     return frame[y1:y2, x1:x2], (x1, y1, x2, y2)
 
 
-def predict_frame(frame, detectors, classifier, classes, transform, device, conf):
+def predict_frame(frame, detectors, classifier, classes, transform, device, conf,
+                  smoother: SmoothedClassifier | None = None):
     detection = detect_with_cascade(frame, detectors, conf)
     if detection is None:
         return frame, None
@@ -54,6 +72,10 @@ def predict_frame(frame, detectors, classifier, classes, transform, device, conf
     tensor = transform(Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))).unsqueeze(0).to(device)
     with torch.no_grad():
         probabilities = torch.softmax(classifier(tensor), dim=1)[0]
+
+    if smoother is not None:
+        probabilities = smoother.update(probabilities)
+
     class_index = int(probabilities.argmax().item())
     class_confidence = float(probabilities[class_index].item())
     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
@@ -65,11 +87,15 @@ def predict_frame(frame, detectors, classifier, classes, transform, device, conf
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--image", type=Path, required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--image", type=Path, help="Path to a single image file")
+    source.add_argument("--camera", type=int, help="Camera device index, usually 0")
     parser.add_argument("--model", type=Path, default=Path("models/classifier/best_effnet_b2_cat_breeds.pth"))
     parser.add_argument("--class-map", type=Path, default=Path("config/class_to_idx.json"))
     parser.add_argument("--conf", type=float, default=0.25)
     parser.add_argument("--output", type=Path, default=Path("outputs/runtime/pipeline_result.jpg"))
+    parser.add_argument("--smooth", type=int, default=15,
+                        help="Sliding-window size for probability smoothing (0 = off)")
     return parser.parse_args()
 
 
@@ -80,15 +106,40 @@ def main() -> None:
     detectors = load_detectors()
     classifier, classes = load_classifier(args.model, args.class_map, device)
     transform = EfficientNet_B2_Weights.DEFAULT.transforms()
-    frame = cv2.imread(str(args.image))
-    if frame is None:
-        raise FileNotFoundError(args.image)
-    annotated, prediction = predict_frame(frame, detectors, classifier, classes, transform, device, args.conf)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    if not cv2.imwrite(str(args.output), annotated):
-        raise RuntimeError(f"Could not write output image: {args.output}")
-    print("Prediction:", prediction if prediction else "No cat detected")
-    print("Saved:", args.output)
+
+    # Single image
+    if args.image:
+        frame = cv2.imread(str(args.image))
+        if frame is None:
+            raise FileNotFoundError(args.image)
+        annotated, prediction = predict_frame(frame, detectors, classifier, classes, transform, device, args.conf)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        if not cv2.imwrite(str(args.output), annotated):
+            raise RuntimeError(f"Could not write output image: {args.output}")
+        print("Prediction:", prediction if prediction else "No cat detected")
+        print("Saved:", args.output)
+        return
+
+    # Live camera with frame smoothing
+    smoother = SmoothedClassifier(window=args.smooth) if args.smooth > 0 else None
+    cap = cv2.VideoCapture(args.camera)
+    if not cap.isOpened():
+        raise RuntimeError(f"Could not open camera index {args.camera}")
+    print(f"Smoothing: {args.smooth} frames" if smoother else "Smoothing: off")
+    print("Press q to quit.")
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+        annotated, prediction = predict_frame(frame, detectors, classifier, classes, transform, device, args.conf,
+                                               smoother=smoother)
+        if prediction:
+            print(prediction["breed"], f"{prediction['classification_confidence']:.2f}")
+        cv2.imshow("Cat breed inference", annotated)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+    cap.release()
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

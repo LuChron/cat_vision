@@ -45,7 +45,7 @@ It writes annotated images to `outputs/batch_run/annotated/` and one result per 
 
 On the current 12 on-site camera snapshots, YOLO26n alone detected 10/12 cats; the YOLO26n -> YOLO11m cascade detected 12/12 at confidence `0.25`. This is a small local test set, not a guarantee for every lighting condition or camera angle.
 
-The EfficientNet-B2 checkpoint was trained for 15 epochs on automatically YOLO-cropped images. Its best validation accuracy was **98.92%** on the current split. The Pallas validation set is small, so more varied real-scene examples would improve confidence in that class.
+The EfficientNet-B2 checkpoint was trained for 15 epochs on automatically YOLO-cropped images. A fresh full-precision evaluation of the selected checkpoint gives **227/231 = 98.27%** on the current validation split. The Pallas validation set is small, so more varied real-scene examples would improve confidence in that class.
 
 ## Repository layout
 
